@@ -1,0 +1,54 @@
+spring:
+  # ─── Application Name ─────────────────────────────────────
+  application:
+    name: VitalIQ
+
+  # ─── PostgreSQL Configuration ────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/vitaliqdb
+    username: vitaliq
+    password: vitaliq123
+    driver-class-name: org.postgresql.Driver
+
+  # ─── JPA/Hibernate Configuration ─────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # ─── Kafka Configuration ──────────────────────────────────
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: vitaliq-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+  # ─── Elasticsearch Configuration ──────────────────────────
+  elasticsearch:
+    uris: http://localhost:9200
+
+# ─── OpenAI Configuration ─────────────────────────────────
+openai:
+  api-key: ${OPENAI_API_KEY}
+
+# ─── Server Configuration ─────────────────────────────────
+server:
+  port: 8080
+
+# ─── Logging Configuration ────────────────────────────────
+logging:
+  level:
+    com.vitaliq: DEBUG
+    org.springframework: INFO
+    org.apache.kafka: WARN
