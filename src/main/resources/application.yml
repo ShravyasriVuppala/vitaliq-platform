@@ -52,3 +52,10 @@ logging:
     com.vitaliq: DEBUG
     org.springframework: INFO
     org.apache.kafka: WARN
+
+# ─── JWT Configuration ────────────────────────────────
+app:
+  jwt:
+    secret: 514f539f68a1439397378cef0f313665f706f10be2456572c82ff937b0c5dd0a
+    access-token-expiration: 900000      # 15 minutes in milliseconds
+    refresh-token-expiration: 604800000  # 7 days in milliseconds
