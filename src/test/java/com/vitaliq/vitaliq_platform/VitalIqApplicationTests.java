@@ -1,4 +1,4 @@
-package com.vitaiq.vitaliq_platform;
+package com.vitaliq.vitaliq_platform;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
