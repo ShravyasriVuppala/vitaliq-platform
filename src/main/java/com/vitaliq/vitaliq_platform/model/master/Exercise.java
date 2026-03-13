@@ -1,5 +1,6 @@
 package com.vitaliq.vitaliq_platform.model.master;
 
+import com.vitaliq.vitaliq_platform.enums.EquipmentType;
 import com.vitaliq.vitaliq_platform.enums.ExerciseCategory;
 import com.vitaliq.vitaliq_platform.enums.MuscleGroup;
 import com.vitaliq.vitaliq_platform.model.auth.User;
@@ -53,4 +54,7 @@ public class Exercise {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private EquipmentType equipmentType;
 }
