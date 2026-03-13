@@ -38,6 +38,11 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
 
+  # ─── SQL file  ──────────────────────────
+  sql:
+    init:
+      mode: always
+
 # ─── OpenAI Configuration ─────────────────────────────────
 openai:
   api-key: ${OPENAI_API_KEY}
