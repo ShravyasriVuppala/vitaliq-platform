@@ -2,7 +2,6 @@ package com.vitaliq.vitaliq_platform.model.workout;
 
 import com.vitaliq.vitaliq_platform.enums.SetContext;
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,8 +21,12 @@ public abstract class ExerciseSet {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workout_exercise_id", nullable = false)
+    @JoinColumn(name = "workout_exercise_id", nullable = true)  // nullable — template sets won't have this
     private WorkoutExercise workoutExercise;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_exercise_id", nullable = true)  // nullable — workout sets won't have this
+    private TemplateExercise templateExercise;
 
     @Column(nullable = false)
     private Integer setNumber;
@@ -36,4 +39,6 @@ public abstract class ExerciseSet {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SetContext setContext;
+
+    public abstract ExerciseSet deepCopy(TemplateExercise newParent, int setOrder);
 }
