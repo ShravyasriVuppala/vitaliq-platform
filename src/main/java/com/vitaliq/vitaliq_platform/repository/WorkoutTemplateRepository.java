@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface WorkoutTemplateRepository extends JpaRepository<WorkoutTemplate, UUID> {
     List<WorkoutTemplate> findByTemplateType(TemplateType templateType);
     List<WorkoutTemplate> findByCreatedById(UUID userId);
+    List<WorkoutTemplate> findByTemplateTypeOrCreatedById(TemplateType templateType, UUID createdById);
 }

@@ -34,6 +34,9 @@ public class WorkoutTemplate {
     @Column(nullable = false)
     private TemplateType templateType;
 
+    @Column(nullable = true)
+    private UUID forkedFromId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
     private User createdBy;
