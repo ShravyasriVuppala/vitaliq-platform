@@ -1,4 +1,4 @@
-package com.vitaliq.vitaliq_platform.dto.template;
+package com.vitaliq.vitaliq_platform.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

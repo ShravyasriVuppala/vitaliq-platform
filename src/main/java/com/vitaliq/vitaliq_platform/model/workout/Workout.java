@@ -46,6 +46,8 @@ public class Workout {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    private Double totalVolumeKg;
+    private Double totalVolumeLbs;
+
+    private UUID templateId;  // nullable — null if logged without a template
 
 }

@@ -1,13 +1,13 @@
-package com.vitaliq.vitaliq_platform.dto.template;
+package com.vitaliq.vitaliq_platform.dto.common;
 
+import com.vitaliq.vitaliq_platform.enums.EquipmentType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import com.vitaliq.vitaliq_platform.enums.EquipmentType;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class CreateWeightedSetRequest extends CreateSetRequest {
+public class CreateWeightedSetRequest extends CreateSetRequest{
 
     private Double weightLbs;  // nullable — bodyweight exercises
 
