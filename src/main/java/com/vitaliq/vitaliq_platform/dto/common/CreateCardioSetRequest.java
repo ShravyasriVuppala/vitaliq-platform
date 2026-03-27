@@ -1,4 +1,4 @@
-package com.vitaliq.vitaliq_platform.dto.template;
+package com.vitaliq.vitaliq_platform.dto.common;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class CreateCardioSetRequest extends CreateSetRequest {
+public class CreateCardioSetRequest extends CreateSetRequest{
 
     @NotNull @Positive
     private Double durationMinutes;
