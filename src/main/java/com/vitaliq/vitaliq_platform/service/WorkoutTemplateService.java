@@ -1,5 +1,8 @@
 package com.vitaliq.vitaliq_platform.service;
 
+import com.vitaliq.vitaliq_platform.dto.common.CreateCardioSetRequest;
+import com.vitaliq.vitaliq_platform.dto.common.CreateSetRequest;
+import com.vitaliq.vitaliq_platform.dto.common.CreateWeightedSetRequest;
 import com.vitaliq.vitaliq_platform.dto.exercise.ExerciseResponse;
 import com.vitaliq.vitaliq_platform.dto.template.*;
 import com.vitaliq.vitaliq_platform.enums.SetContext;
@@ -16,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
