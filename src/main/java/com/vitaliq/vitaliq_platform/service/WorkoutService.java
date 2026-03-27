@@ -5,6 +5,8 @@ import com.vitaliq.vitaliq_platform.dto.exercise.ExerciseResponse;
 import com.vitaliq.vitaliq_platform.dto.template.SetResponse;
 import com.vitaliq.vitaliq_platform.dto.workout.*;
 import com.vitaliq.vitaliq_platform.enums.SetContext;
+import com.vitaliq.vitaliq_platform.kafka.WorkoutKafkaProducer;
+import com.vitaliq.vitaliq_platform.event.WorkoutEvent;
 import com.vitaliq.vitaliq_platform.model.auth.User;
 import com.vitaliq.vitaliq_platform.model.master.Exercise;
 import com.vitaliq.vitaliq_platform.model.workout.*;
@@ -17,9 +19,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class WorkoutService {
     private final ExerciseSetRepository exerciseSetRepository;
     private final ExerciseRepository exerciseRepository;
     private final UserRepository userRepository;
+    private final WorkoutKafkaProducer workoutKafkaProducer;
 
     // ─── Helper: extract authenticated user from JWT ───────────────────────
 
@@ -59,11 +62,20 @@ public class WorkoutService {
         // 2. Build WorkoutExercises and their ExerciseSets
         double totalVolumeLbs = 0.0;
         int displayOrder = 0;
+        int totalSets = 0;
+
+        // LinkedHashSet — deduplicates muscle groups, preserves insertion order
+        Set<String> muscleGroupsWorked = new LinkedHashSet<>();
 
         for (LogWorkoutExerciseRequest exReq : request.getExercises()) {
             Exercise exercise = exerciseRepository.findById(exReq.getExerciseId())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Exercise not found: " + exReq.getExerciseId()));
+
+            // Collect muscle group while we already have the Exercise entity in hand
+            if (exercise.getPrimaryMuscleGroup() != null) {
+                muscleGroupsWorked.add(exercise.getPrimaryMuscleGroup().name());
+            }
 
             WorkoutExercise workoutExercise = new WorkoutExercise();
             workoutExercise.setWorkout(workout);
@@ -76,6 +88,7 @@ public class WorkoutService {
             for (CreateSetRequest setReq : exReq.getSets()) {
                 ExerciseSet set = buildSet(setReq, workoutExercise, setOrder++);
                 exerciseSetRepository.save(set);
+                totalSets++;
 
                 // Accumulate volume — only WeightedSets with non-null weight contribute
                 if (set instanceof WeightedSet w
@@ -89,6 +102,26 @@ public class WorkoutService {
         // 3. Write totalVolumeLbs back — null for cardio-only workouts
         workout.setTotalVolumeLbs(totalVolumeLbs > 0.0 ? totalVolumeLbs : null);
         workoutRepository.save(workout);
+
+        // 4. Build and publish WorkoutEvent to Kafka
+        // acks=0 — fire and forget. isIndexed flag is our reliability guarantee.
+        WorkoutEvent event = WorkoutEvent.builder()
+                .workoutId(workout.getId())
+                .userId(user.getId())
+                .workoutName(workout.getName())
+                .templateId(workout.getTemplateId())
+                .startTime(workout.getStartTime())
+                .endTime(workout.getEndTime())
+                .durationMinutes(ChronoUnit.MINUTES.between(
+                        workout.getStartTime(), workout.getEndTime()))
+                .totalVolumeLbs(workout.getTotalVolumeLbs())
+                .exerciseCount(request.getExercises().size())
+                .totalSets(totalSets)
+                .muscleGroupsWorked(new ArrayList<>(muscleGroupsWorked))
+                .occurredAt(LocalDateTime.now())
+                .build();
+
+        workoutKafkaProducer.publish(event);
 
         return toResponse(workout);
     }
