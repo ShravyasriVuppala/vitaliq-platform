@@ -29,17 +29,20 @@ public class WorkoutDocument {
     @Field(type = FieldType.Text)
     private String workoutName;
 
+    @Field(type = FieldType.Keyword)
+    private UUID templateId;  // nullable
+
     @Field(type = FieldType.Date)
     private LocalDateTime startTime;
 
     @Field(type = FieldType.Date)
     private LocalDateTime endTime;
 
-    @Field(type = FieldType.Double)
-    private Double durationMinutes;
+    @Field(type = FieldType.Long)
+    private Long durationMinutes;  // fixed: was Double
 
-    @Field(type = FieldType.Keyword)
-    private List<String> muscleGroupsWorked;
+    @Field(type = FieldType.Double)
+    private Double totalVolumeLbs;  // renamed from totalVolumeKg; null if cardio-only
 
     @Field(type = FieldType.Integer)
     private Integer exerciseCount;
@@ -47,9 +50,9 @@ public class WorkoutDocument {
     @Field(type = FieldType.Integer)
     private Integer totalSets;
 
+    @Field(type = FieldType.Keyword)
+    private List<String> muscleGroupsWorked;  // each value independently searchable in ES
+
     @Field(type = FieldType.Date)
     private LocalDateTime occurredAt;
-
-    @Field(type = FieldType.Double)
-    private Double totalVolumeKg;
 }
