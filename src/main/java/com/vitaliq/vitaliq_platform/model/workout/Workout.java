@@ -46,8 +46,12 @@ public class Workout {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    private Double totalVolumeLbs;
+    private Double totalVolumeLbs;  // sum of (weightLbs * reps); null if cardio-only
 
     private UUID templateId;  // nullable — null if logged without a template
+
+    @Column(nullable = false)
+    private boolean isIndexed = false;  // false until Kafka consumer confirms ES indexing
+
 
 }
