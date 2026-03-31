@@ -46,9 +46,11 @@ public class WorkoutIndexingRecoveryJob {
                 // via Kafka will have these fields fully populated.
                 WorkoutDocument document = WorkoutDocument.builder()
                         .id(workout.getId())
-                        .userId(workout.getUser().getId())
+                        .userId(workout.getUser().getId().toString())
                         .workoutName(workout.getName())
-                        .templateId(workout.getTemplateId())
+                        .templateId(workout.getTemplateId() != null
+                                ? workout.getTemplateId().toString()
+                                : null)
                         .startTime(workout.getStartTime())
                         .endTime(workout.getEndTime())
                         .durationMinutes(durationMinutes)

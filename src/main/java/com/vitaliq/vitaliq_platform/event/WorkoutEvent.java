@@ -18,7 +18,7 @@ public class WorkoutEvent {
     private UUID workoutId;
     private UUID userId;
     private String workoutName;
-    private UUID templateId;              // nullable — null if logged without a template
+    private String templateId;              // nullable — null if logged without a template
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Long durationMinutes;         // derived, carried so consumer needs no DB call
