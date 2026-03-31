@@ -109,7 +109,9 @@ public class WorkoutService {
                 .workoutId(workout.getId())
                 .userId(user.getId())
                 .workoutName(workout.getName())
-                .templateId(workout.getTemplateId())
+                .templateId(workout.getTemplateId() != null
+                        ? workout.getTemplateId().toString()
+                        : null)
                 .startTime(workout.getStartTime())
                 .endTime(workout.getEndTime())
                 .durationMinutes(ChronoUnit.MINUTES.between(
