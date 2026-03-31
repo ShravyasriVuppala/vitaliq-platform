@@ -26,7 +26,7 @@ public class WorkoutKafkaConsumer {
             // Step 1 — build WorkoutDocument from the event (no DB call needed)
             WorkoutDocument document = WorkoutDocument.builder()
                     .id(event.getWorkoutId())
-                    .userId(event.getUserId())
+                    .userId(event.getUserId().toString())
                     .workoutName(event.getWorkoutName())
                     .templateId(event.getTemplateId())
                     .startTime(event.getStartTime())

@@ -15,7 +15,7 @@ public class WorkoutKafkaProducer {
 
     private final KafkaTemplate<String, WorkoutEvent> kafkaTemplate; //kafkaTemplate bean which spring initializes from app.yml configs
 
-    public void publish(WorkoutEvent event) {
+    public void  publish(WorkoutEvent event) {
         // Key = userId — all events for the same user go to the same partition
         // This guarantees ordering of workout events per user
         kafkaTemplate.send(TOPIC, event.getUserId().toString(), event);
