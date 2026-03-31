@@ -24,13 +24,13 @@ public class WorkoutDocument {
     private UUID id;
 
     @Field(type = FieldType.Keyword)
-    private UUID userId;
+    private String userId;
 
     @Field(type = FieldType.Text)
     private String workoutName;
 
     @Field(type = FieldType.Keyword)
-    private UUID templateId;  // nullable
+    private String templateId;  // nullable
 
     @Field(type = FieldType.Date)
     private LocalDateTime startTime;
