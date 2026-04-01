@@ -5,9 +5,9 @@ spring:
 
   # ─── PostgreSQL Configuration ────────────────────────────
   datasource:
-    url: jdbc:postgresql://localhost:5432/vitaliqdb
-    username: vitaliq
-    password: vitaliq123
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   # ─── JPA/Hibernate Configuration ─────────────────────────
@@ -22,7 +22,7 @@ spring:
 
   # ─── Kafka Configuration ──────────────────────────────────
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       acks: 0
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -37,16 +37,28 @@ spring:
 
   # ─── Elasticsearch Configuration ──────────────────────────
   elasticsearch:
-    uris: http://localhost:9200
+    uris: ${ELASTICSEARCH_URIS}
 
   # ─── SQL file  ──────────────────────────
   sql:
     init:
       mode: always
 
+
+# AI provider configuration
+ai:
+  provider: ${AI_PROVIDER}        # change to switch providers
+
 # ─── OpenAI Configuration ─────────────────────────────────
 openai:
-  api-key: ${OPENAI_API_KEY}
+  model: ${OPENAI_MODEL}
+  max-tokens: ${OPENAI_MAX_TOKENS}
+
+# ─── Anthropic Configuration ─────────────────────────────────
+anthropic:
+  model: ${ANTHROPIC_MODEL}
+  max-tokens: ${ANTHROPIC_MAX_TOKENS}
+  # api-key NOT here — SDK reads ANTHROPIC_API_KEY from environment via fromEnv()
 
 # ─── Server Configuration ─────────────────────────────────
 server:
@@ -62,6 +74,6 @@ logging:
 # ─── JWT Configuration ────────────────────────────────
 app:
   jwt:
-    secret: 514f539f68a1439397378cef0f313665f706f10be2456572c82ff937b0c5dd0a
-    access-token-expiration: 900000      # 15 minutes in milliseconds
-    refresh-token-expiration: 604800000  # 7 days in milliseconds
+    secret: ${JWT_SECRET}
+    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+    refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
