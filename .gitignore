@@ -47,3 +47,6 @@ logs/
 
 # Mac specific
 .DS_Store
+
+# Local dev config — contains real secrets, never commit
+src/main/resources/application-local.yml
