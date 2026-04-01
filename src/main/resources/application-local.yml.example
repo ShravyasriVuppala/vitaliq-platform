@@ -1,0 +1,34 @@
+# ─────────────────────────────────────────────────────────────
+# LOCAL DEVELOPMENT TEMPLATE
+# Copy this file to application-local.yml and fill in values.
+# application-local.yml is gitignored — never commit it.
+# ─────────────────────────────────────────────────────────────
+
+spring:
+  datasource:
+    url: jdbc:postgresql://host:port/db
+    username: DB_USERNAME
+    password: DB_PASSWORD
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  elasticsearch:
+    uris: http://localhost:9200
+
+ai:
+  provider: claude   # or "openai"
+
+anthropic:
+  model: YOUR_ANTHROPIC_MODEL
+  max-tokens: 2048
+
+openai:
+  model: YOUR_OPENAI_MODEL
+  max-tokens: 2048
+
+app:
+  jwt:
+    secret: GENERATE_A_64_CHAR_HEX_STRING_HERE
+    access-token-expiration: 900000      # 15 minutes
+    refresh-token-expiration: 604800000  # 7 days
