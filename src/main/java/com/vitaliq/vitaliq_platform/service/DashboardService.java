@@ -56,7 +56,7 @@ public class DashboardService {
 
     public DashboardSummaryResponse getSummary() {
         try {
-            apiKeyService.validateApiKeyScope("view_dashboard");
+            apiKeyService.validateApiKeyScope("workouts");
             User user = getAuthenticatedUser();
             String userId = user.getId().toString();
 
