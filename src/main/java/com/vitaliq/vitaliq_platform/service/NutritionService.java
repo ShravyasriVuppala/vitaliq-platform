@@ -63,7 +63,7 @@ public class NutritionService {
     @Transactional
     public NutritionPlanResponse generatePlan(GenerateNutritionRequest request) {
 
-        apiKeyService.validateApiKeyScope("generate_nutrition_plan");
+        apiKeyService.validateApiKeyScope("nutrition");
         User user = getAuthenticatedUser();
         LocalDate planDate = request.getPlanDate() != null
                 ? request.getPlanDate()
