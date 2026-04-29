@@ -47,6 +47,7 @@ public class NutritionService {
     private final WorkoutRepository workoutRepository;
     private final ObjectMapper objectMapper;
     private final AiChatService aiChatService;
+    private final ApiKeyService apiKeyService;
 
     // ─── Helper: extract authenticated user from JWT ───────────────────────
 
@@ -62,6 +63,7 @@ public class NutritionService {
     @Transactional
     public NutritionPlanResponse generatePlan(GenerateNutritionRequest request) {
 
+        apiKeyService.validateApiKeyScope("generate_nutrition_plan");
         User user = getAuthenticatedUser();
         LocalDate planDate = request.getPlanDate() != null
                 ? request.getPlanDate()

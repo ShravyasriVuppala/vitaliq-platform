@@ -22,11 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User not found with email: " + email));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPasswordHash())
-                .disabled(!user.isActive())
-                .accountLocked(!user.isActive())
-                .build();
+        // Return our custom VitalIqUserDetails (JWT auth - no ApiKey)
+        return new VitalIqUserDetails(user);
     }
 }

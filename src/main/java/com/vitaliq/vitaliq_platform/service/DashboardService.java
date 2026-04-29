@@ -33,6 +33,7 @@ public class DashboardService {
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final UserRepository userRepository;
+    private final ApiKeyService apiKeyService;
 
     // ─── Helper: extract authenticated user from JWT ───────────────────────
 
@@ -55,6 +56,7 @@ public class DashboardService {
 
     public DashboardSummaryResponse getSummary() {
         try {
+            apiKeyService.validateApiKeyScope("view_dashboard");
             User user = getAuthenticatedUser();
             String userId = user.getId().toString();
 
