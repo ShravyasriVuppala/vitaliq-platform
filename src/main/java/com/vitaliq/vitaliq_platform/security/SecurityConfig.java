@@ -23,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
     private final UserDetailsService userDetailsService;
 
     @Bean
@@ -45,8 +46,14 @@ public class SecurityConfig {
                 // Register our authentication provider
                 .authenticationProvider(authenticationProvider())
 
+                .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, ApiKeyAuthenticationFilter.class);
+
+
+//                // Add API Key filter BEFORE JWT filter
+//                .addFilterBefore(apiKeyAuthenticationFilter, JwtFilter.class)
                 // Add JWT filter before Spring's default auth filter
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                //.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
