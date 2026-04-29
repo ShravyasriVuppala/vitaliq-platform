@@ -33,6 +33,7 @@ public class WorkoutService {
     private final ExerciseRepository exerciseRepository;
     private final UserRepository userRepository;
     private final WorkoutKafkaProducer workoutKafkaProducer;
+    private final ApiKeyService apiKeyService;
 
     // ─── Helper: extract authenticated user from JWT ───────────────────────
 
@@ -47,6 +48,7 @@ public class WorkoutService {
 
     @Transactional
     public WorkoutResponse logWorkout(LogWorkoutRequest request) {
+        apiKeyService.validateApiKeyScope("log_workouts");
         User user = getAuthenticatedUser();
 
         // 1. Save the Workout shell first — needs an ID before exercises can reference it
@@ -131,6 +133,7 @@ public class WorkoutService {
     // ── GET /api/workouts ────────────────────────────────────────────────────
 
     public List<WorkoutResponse> getWorkoutHistory() {
+        apiKeyService.validateApiKeyScope("search_workouts");
         User user = getAuthenticatedUser();
         return workoutRepository.findByUserIdOrderByStartTimeDesc(user.getId())
                 .stream()
