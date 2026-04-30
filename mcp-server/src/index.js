@@ -187,6 +187,90 @@ const TOOLS = [
       },
       required: []
     }
+  },
+  {
+    name: "get_templates",
+    description: "Get list of available workout templates (system and user-defined) with their exercises and IDs",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: []
+    }
+  },
+  {
+    name: "log_workout_from_template",
+    description: "Log a completed workout using a saved template with optional exercise modifications. Use get_templates to resolve template names to IDs, and get_exercises to resolve exercise names to IDs. Set updateTemplate=true only when the user explicitly wants to save the modifications back to the template.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        templateId: {
+          type: "string",
+          description: "UUID of the template to log from (get from get_templates tool)"
+        },
+        startTime: {
+          type: "string",
+          description: "ISO 8601 datetime when workout started (optional, defaults to now)"
+        },
+        endTime: {
+          type: "string",
+          description: "ISO 8601 datetime when workout ended (optional, defaults to 1 hour after start)"
+        },
+        exerciseModifications: {
+          type: "array",
+          description: "Optional list of exercises to override with different sets than the template defaults",
+          items: {
+            type: "object",
+            properties: {
+              exerciseId: {
+                type: "string",
+                description: "UUID of the exercise to modify (get from get_exercises tool)"
+              },
+              modifiedSets: {
+                type: "array",
+                description: "Replacement sets for this exercise",
+                items: {
+                  type: "object",
+                  oneOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        type: { type: "string", enum: ["WEIGHTED"] },
+                        reps: { type: "number", description: "Number of repetitions" },
+                        weightLbs: { type: "number", description: "Weight in lbs (optional for bodyweight)" },
+                        equipmentType: {
+                          type: "string",
+                          enum: ["DUMBBELL", "BARBELL", "MACHINE", "KETTLEBELL", "CABLE", "BODYWEIGHT"]
+                        }
+                      },
+                      required: ["type", "reps", "equipmentType"]
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        type: { type: "string", enum: ["CARDIO"] },
+                        durationMinutes: { type: "number", description: "Duration in minutes" },
+                        distanceMiles: { type: "number", description: "Distance in miles (optional)" }
+                      },
+                      required: ["type", "durationMinutes"]
+                    }
+                  ]
+                }
+              }
+            },
+            required: ["exerciseId", "modifiedSets"]
+          }
+        },
+        notes: {
+          type: "string",
+          description: "Optional notes about the workout"
+        },
+        updateTemplate: {
+          type: "boolean",
+          description: "Whether to save the exercise modifications back to the template. Set true only when user explicitly confirms they want the template updated."
+        }
+      },
+      required: ["templateId", "updateTemplate"]
+    }
   }
 ];
 
@@ -232,6 +316,14 @@ async function handleToolCall(params) {
 
       case "generate_nutrition_plan":
         result = await handleGenerateNutritionPlan(toolInput);
+        break;
+
+      case "get_templates":
+        result = await handleGetTemplates(toolInput);
+        break;
+
+      case "log_workout_from_template":
+        result = await handleLogWorkoutFromTemplate(toolInput);
         break;
 
       default:
@@ -389,6 +481,67 @@ async function handleGenerateNutritionPlan(input) {
     const detail = error.response?.data?.message ?? error.response?.data ?? error.message;
     return {
       content: [{ type: "text", text: `Error: ${detail}` }],
+      isError: true
+    };
+  }
+}
+
+
+async function handleGetTemplates(input) {
+  try {
+    const response = await axios.get(
+      `${API_URL}/api/templates`,
+      { headers: { "X-API-Key": API_KEY } }
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(response.data, null, 2)
+        }
+      ]
+    };
+  } catch (error) {
+    const detail = error.response?.data?.message ?? error.response?.data ?? error.message;
+    return {
+      content: [{ type: "text", text: `Error: ${detail}` }],
+      isError: true
+    };
+  }
+}
+
+async function handleLogWorkoutFromTemplate(input) {
+  try {
+    const { templateId, startTime, endTime, exerciseModifications, notes, updateTemplate } = input;
+
+    const requestBody = {
+      templateId,
+      startTime,
+      endTime,
+      exerciseModifications,
+      notes,
+      updateTemplate
+    };
+
+    const response = await axios.post(
+      `${API_URL}/api/workouts/from-template`,
+      requestBody,
+      { headers: { "X-API-Key": API_KEY } }
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `✅ Workout logged from template!\n\n${JSON.stringify(response.data, null, 2)}`
+        }
+      ]
+    };
+  } catch (error) {
+    const detail = error.response?.data?.message ?? error.response?.data ?? error.message;
+    return {
+      content: [{ type: "text", text: `Error logging workout from template: ${detail}` }],
       isError: true
     };
   }
