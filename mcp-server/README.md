@@ -120,20 +120,20 @@ Stop with `Ctrl+C`.
 
 ### Auto-Start with Claude Desktop
 
-Configure in `~/.config/claude/claude.json`:
+Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
-```json
 {
   "mcpServers": {
     "vitaliq": {
       "command": "node",
-      "args": ["/Users/YOUR_USERNAME/Developer/vitaliq-platform/mcp-server/src/index.js"]
+      "args": ["/Users/YOUR_USERNAME/Developer/vitaliq-platform/mcp-server/src/index.js"],
+      "env": {
+        "VITALIQ_API_URL": "http://localhost:8080",
+        "VITALIQ_API_KEY": "your_api_key_with_workouts_nutrition_scopes"
+      }
     }
   }
 }
-```
-
-Replace `YOUR_USERNAME` with your actual macOS username.
 
 Then:
 - Open Claude Desktop → Server auto-starts
@@ -155,15 +155,15 @@ node src/index.js
 
 ### 3. Use in Claude Desktop
 
-"What exercises are available?"
+- "What exercises are available?"
 → Uses get_exercises tool
-"Log my chest workout: 3 sets of bench press, 185 lbs, 10 reps each"
+- "Log my chest workout: 3 sets of bench press, 185 lbs, 10 reps each"
 → Uses log_workout tool
-"Show me my recent workouts"
+- "Show me my recent workouts"
 → Uses search_workouts tool
-"What's my fitness summary?"
+- "What's my fitness summary?"
 → Uses get_dashboard tool
-"Generate my nutrition plan"
+- "Generate my nutrition plan"
 → Uses generate_nutrition_plan tool
 
 ## API Key Scopes
@@ -199,19 +199,19 @@ Create an API key with both scopes:
 
 ### Request Flow
 Claude: "Log my workout"
-↓
+→
 MCP Server receives: tools/call with log_workout
-↓
+→
 handleLogWorkout() executes
-↓
+→
 POST /api/workouts with X-API-Key header
-↓
+→
 Spring Boot validates API key scope
-↓
+→
 Workout logged in PostgreSQL
-↓
+→
 Elasticsearch indexed (via Kafka)
-↓
+→
 Response sent to Claude
 
 ### Files
@@ -224,5 +224,4 @@ Response sent to Claude
 ## References
 
 - [MCP Specification](https://modelcontextprotocol.io/)
-- [VitalIQ Backend](../backend/README.md)
 - [Claude Desktop Docs](https://claude.ai/docs)
