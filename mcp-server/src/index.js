@@ -199,7 +199,7 @@ const TOOLS = [
   },
   {
     name: "log_workout_from_template",
-    description: "Log a completed workout using a saved template with optional exercise modifications. Use get_templates to resolve template names to IDs, and get_exercises to resolve exercise names to IDs. Set updateTemplate=true only when the user explicitly wants to save the modifications back to the template.",
+    description: "Log a completed workout using a saved template with optional modifications. IMPORTANT: If you detect that the user has provided modifications to exercises: 1. Ask the user: 'Should I update the [TemplateName] template with these new values?' 2. Wait for their answer 3. Set updateTemplate=true if user says yes, false if they say no 4. Call this tool with the appropriate updateTemplate value If there are NO modifications, set updateTemplate=false directly (no ask needed).",
     inputSchema: {
       type: "object",
       properties: {
@@ -271,6 +271,102 @@ const TOOLS = [
       },
       required: ["templateId", "updateTemplate"]
     }
+  },
+  {
+    name: "create_exercise",
+    description: "Create a new user-defined exercise. Call get_exercises first to check if the exercise already exists before creating a duplicate.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "Exercise name (e.g., 'Incline Dumbbell Press')"
+        },
+        category: {
+          type: "string",
+          enum: ["WEIGHTED", "CARDIO"],
+          description: "Exercise category"
+        },
+        primaryMuscleGroup: {
+          type: "string",
+          enum: ["CHEST", "BACK", "LEGS", "SHOULDERS", "BICEPS", "TRICEPS", "FOREARMS", "CORE", "GLUTES", "CARDIO"],
+          description: "Primary muscle group targeted"
+        },
+        equipmentType: {
+          type: "string",
+          enum: ["DUMBBELL", "BARBELL", "MACHINE", "KETTLEBELL", "CABLE", "BODYWEIGHT"],
+          description: "Equipment required for this exercise"
+        }
+      },
+      required: ["name", "category", "primaryMuscleGroup", "equipmentType"]
+    }
+  },
+  {
+    name: "create_template",
+    description: "Create a new workout template with exercises and sets. All exerciseIds must be valid UUIDs — use get_exercises or create_exercise to obtain them first.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "Template name (e.g., 'Chest Day', 'Pull Day')"
+        },
+        description: {
+          type: "string",
+          description: "Optional description of the template"
+        },
+        exercises: {
+          type: "array",
+          description: "Ordered list of exercises in the template",
+          items: {
+            type: "object",
+            properties: {
+              exerciseId: {
+                type: "string",
+                description: "UUID of the exercise (from get_exercises or create_exercise)"
+              },
+              orderIndex: {
+                type: "number",
+                description: "Position of this exercise in the template (0-based)"
+              },
+              sets: {
+                type: "array",
+                description: "Default sets for this exercise",
+                items: {
+                  type: "object",
+                  oneOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        type: { type: "string", enum: ["WEIGHTED"] },
+                        reps: { type: "number", description: "Number of repetitions" },
+                        weightLbs: { type: "number", description: "Weight in lbs (optional for bodyweight)" },
+                        equipmentType: {
+                          type: "string",
+                          enum: ["DUMBBELL", "BARBELL", "MACHINE", "KETTLEBELL", "CABLE", "BODYWEIGHT"]
+                        }
+                      },
+                      required: ["type", "reps", "equipmentType"]
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        type: { type: "string", enum: ["CARDIO"] },
+                        durationMinutes: { type: "number", description: "Duration in minutes" },
+                        distanceMiles: { type: "number", description: "Distance in miles (optional)" }
+                      },
+                      required: ["type", "durationMinutes"]
+                    }
+                  ]
+                }
+              }
+            },
+            required: ["exerciseId", "orderIndex", "sets"]
+          }
+        }
+      },
+      required: ["name", "exercises"]
+    }
   }
 ];
 
@@ -324,6 +420,14 @@ async function handleToolCall(params) {
 
       case "log_workout_from_template":
         result = await handleLogWorkoutFromTemplate(toolInput);
+        break;
+
+      case "create_exercise":
+        result = await handleCreateExercise(toolInput);
+        break;
+
+      case "create_template":
+        result = await handleCreateTemplate(toolInput);
         break;
 
       default:
@@ -542,6 +646,61 @@ async function handleLogWorkoutFromTemplate(input) {
     const detail = error.response?.data?.message ?? error.response?.data ?? error.message;
     return {
       content: [{ type: "text", text: `Error logging workout from template: ${detail}` }],
+      isError: true
+    };
+  }
+}
+
+
+async function handleCreateExercise(input) {
+  try {
+    const { name, category, primaryMuscleGroup, equipmentType } = input;
+
+    const response = await axios.post(
+      `${API_URL}/api/exercises`,
+      { name, category, primaryMuscleGroup, equipmentType },
+      { headers: { "X-API-Key": API_KEY } }
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `✅ Exercise created!\n\nID: ${response.data.id}\nName: ${response.data.name}\nCategory: ${response.data.category}\nMuscle Group: ${response.data.primaryMuscleGroup}\nEquipment: ${response.data.equipmentType}`
+        }
+      ]
+    };
+  } catch (error) {
+    const detail = error.response?.data?.message ?? error.response?.data ?? error.message;
+    return {
+      content: [{ type: "text", text: `Error creating exercise: ${detail}` }],
+      isError: true
+    };
+  }
+}
+
+async function handleCreateTemplate(input) {
+  try {
+    const { name, description, exercises } = input;
+
+    const response = await axios.post(
+      `${API_URL}/api/templates`,
+      { name, description: description ?? "", exercises },
+      { headers: { "X-API-Key": API_KEY } }
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `✅ Template created!\n\nID: ${response.data.id}\nName: ${response.data.name}\nExercises: ${exercises.length}\n\n${JSON.stringify(response.data, null, 2)}`
+        }
+      ]
+    };
+  } catch (error) {
+    const detail = error.response?.data?.message ?? error.response?.data ?? error.message;
+    return {
+      content: [{ type: "text", text: `Error creating template: ${detail}` }],
       isError: true
     };
   }

@@ -9,5 +9,6 @@ public enum MuscleGroup {
     LEGS,
     CORE,
     GLUTES,
-    CARDIO
+    CARDIO,
+    FOREARMS
 }
