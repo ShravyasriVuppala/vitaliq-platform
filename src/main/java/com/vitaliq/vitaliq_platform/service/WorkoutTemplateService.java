@@ -31,6 +31,7 @@ public class WorkoutTemplateService {
     private final ExerciseSetRepository exerciseSetRepository;
     private final ExerciseRepository exerciseRepository;
     private final UserRepository userRepository;
+    private final ApiKeyService apiKeyService;
 
     // ─── Helper: extract authenticated user from JWT ───────────────────────
 
@@ -47,6 +48,7 @@ public class WorkoutTemplateService {
     // ── GET /api/templates ───────────────────────────────────────────────────
 
     public List<TemplateResponse> getTemplates() {
+        apiKeyService.validateApiKeyScope("workouts");
         User user = getAuthenticatedUser();
         List<WorkoutTemplate> templates = workoutTemplateRepository
                 .findByTemplateTypeOrCreatedById(TemplateType.SYSTEM, user.getId());
@@ -57,6 +59,7 @@ public class WorkoutTemplateService {
 
     @Transactional
     public TemplateResponse createTemplate(CreateTemplateRequest request) {
+        apiKeyService.validateApiKeyScope("workouts");
         User user = getAuthenticatedUser();
 
         WorkoutTemplate template = new WorkoutTemplate();
@@ -83,6 +86,7 @@ public class WorkoutTemplateService {
 
     @Transactional
     public TemplateResponse updateTemplate(UUID id, CreateTemplateRequest request) {
+        apiKeyService.validateApiKeyScope("workouts");
         User user = getAuthenticatedUser();
         WorkoutTemplate template = findTemplateOrThrow(id);
         assertOwnership(template, user.getId());

@@ -23,6 +23,7 @@ public class ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
     private final UserRepository userRepository;
+    private final ApiKeyService apiKeyService;
 
     private User getAuthenticatedUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -35,6 +36,7 @@ public class ExerciseService {
     }
 
     public List<ExerciseResponse> searchExercises(ExerciseSearchRequest request) {
+        apiKeyService.validateApiKeyScope("workouts");
         User user = getAuthenticatedUser();
 
         List<Exercise> results = new ArrayList<>();
@@ -80,6 +82,7 @@ public class ExerciseService {
 
     @Transactional
     public ExerciseResponse createExercise(CreateExerciseRequest request) {
+        apiKeyService.validateApiKeyScope("workouts");
         User user = getAuthenticatedUser();
 
         Exercise exercise = new Exercise();
